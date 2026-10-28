@@ -17,14 +17,16 @@ web_search_tool = TavilySearch(max_results=3)
 def web_search(state: GraphState) -> Dict[str, Any]:
     print("---WEB SEARCH---")
     question = state['question']
-    document = state['documents']
+    documents = state.get("documents", [])
 
     tavily_results = web_search_tool.invoke({'query': question})
-
-    joined_tavily_result = "\n".join([tavily_result['content'] for tavily_result in tavily_results])
+    joined_tavily_result = "\n".join(
+        result["content"]
+        for result in tavily_results["results"]
+    )
     web_results = Document(joined_tavily_result)
-    if document is not None:
-        document.append(web_results)
+    if documents is not None:
+        documents.append(web_results)
     else:
         documents = [web_results]
     return {'question': question, 'documents': documents}
